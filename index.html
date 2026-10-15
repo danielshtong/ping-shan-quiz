@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>屏山文物徑小測驗</title>
+<style>
+  :root {
+    --bg: #f6f0e6;
+    --card: #fffdf8;
+    --ink: #2c1a0e;
+    --accent: #b33a2b;
+    --gold: #c9a227;
+    --ok: #1f7a4c;
+    --bad: #a32020;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: linear-gradient(180deg, #efe2cf 0%, var(--bg) 40%, #e8dcc8 100%);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 16px 14px 40px; }
+  h1 { font-size: 1.45rem; margin: 8px 0 4px; text-align: center; color: var(--accent); }
+  .sub { text-align: center; color: #6a4c35; font-size: .95rem; margin-bottom: 14px; }
+  .hero {
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(80,40,10,.18);
+    border: 3px solid #d4b07a;
+    background: #ddd;
+  }
+  .hero img { display: block; width: 100%; height: auto; }
+  .caption {
+    font-size: .85rem;
+    color: #6a4c35;
+    text-align: center;
+    margin: 8px 0 18px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 18px 16px;
+    box-shadow: 0 4px 16px rgba(80,40,10,.1);
+    border: 1px solid #e6d3b3;
+  }
+  .progress {
+    height: 10px;
+    background: #ead9bf;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .progress > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    width: 0%;
+    transition: width .25s ease;
+  }
+  .qno { font-size: .85rem; color: #8a6548; margin-bottom: 6px; }
+  .qtext { font-size: 1.12rem; font-weight: 700; line-height: 1.45; margin: 0 0 14px; }
+  .opts { display: grid; gap: 10px; }
+  button.opt {
+    text-align: left;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 2px solid #e0c9a4;
+    background: #fff;
+    font-size: 1rem;
+    color: var(--ink);
+    cursor: pointer;
+    line-height: 1.35;
+  }
+  button.opt:hover:not(:disabled) { border-color: var(--gold); background: #fff8ea; }
+  button.opt:disabled { cursor: default; }
+  button.opt.correct { border-color: var(--ok); background: #e8f6ee; }
+  button.opt.wrong { border-color: var(--bad); background: #fdeceb; }
+  .feedback {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: .95rem;
+    line-height: 1.45;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok { background: #e8f6ee; color: var(--ok); }
+  .feedback.bad { background: #fdeceb; color: var(--bad); }
+  .next-row { margin-top: 14px; display: flex; justify-content: flex-end; }
+  .btn {
+    border: none;
+    border-radius: 999px;
+    padding: 11px 22px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.secondary { background: #6a4c35; }
+  .result { text-align: center; }
+  .result .score {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--accent);
+    margin: 8px 0;
+  }
+  .result p { line-height: 1.5; }
+  .stars { font-size: 1.6rem; letter-spacing: 2px; margin: 6px 0 12px; }
+  #start .card { text-align: center; }
+  #start .btn { margin-top: 8px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>屏山文物徑小測驗</h1>
+  <p class="sub">睇相片，答 5 題基本資料（每題 4 個選項）</p>
+
+  <div class="hero"><img src="altar.jpg" alt="屏山文物徑祖先祭壇相片"></div>
+  <p class="caption">參考相片：傳統祖先神龕與祭桌（屏山鄧族文物常見格局）</p>
+
+  <section id="start" class="card">
+    <p>呢個測驗會問你屏山文物徑嘅位置、歷史、同相片入面見到嘅祭祖文化。</p>
+    <button class="btn" id="startBtn">開始答題</button>
+  </section>
+
+  <section id="quiz" class="card hidden">
+    <div class="progress"><span id="bar"></span></div>
+    <div class="qno" id="qno"></div>
+    <h2 class="qtext" id="qtext"></h2>
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="next-row">
+      <button class="btn" id="nextBtn" disabled>下一題</button>
+    </div>
+  </section>
+
+  <section id="result" class="card result hidden">
+    <p>你完成咗測驗！</p>
+    <div class="score" id="score"></div>
+    <div class="stars" id="stars"></div>
+    <p id="praise"></p>
+    <button class="btn secondary" id="retryBtn">再玩一次</button>
+  </section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "屏山文物徑位於香港邊個地方？",
+    choices: ["九龍黃大仙", "新界元朗屏山", "港島赤柱", "新界西貢"],
+    answer: 1,
+    explain: "屏山文物徑喺新界元朗屏山，係香港首條文物徑。"
+  },
+  {
+    q: "屏山文物徑大概有幾長？係香港第幾條文物徑？",
+    choices: ["約 1.6 公里，香港首條", "約 10 公里，第二條", "約 500 米，第三條", "約 5 公里，最新一條"],
+    answer: 0,
+    explain: "文物徑約 1.6 公里，1993 年開放，係香港首條文物徑。"
+  },
+  {
+    q: "相片入面嘅祖龕同宗祠，主要同邊個宗族有關？",
+    choices: ["李氏", "陳氏", "鄧氏", "黃氏"],
+    answer: 2,
+    explain: "屏山一帶以鄧族著名，鄧氏宗祠係文物徑重點古蹟之一。"
+  },
+  {
+    q: "神龕上方常見橫額「百世其昌」，主要祝願咩？",
+    choices: ["考試一定滿分", "子孫繁榮、家族長久昌盛", "今日一定落雨", "房子一定升值"],
+    answer: 1,
+    explain: "「百世其昌」係傳統吉祥語，祝願家族百世昌盛、子孫興旺。"
+  },
+  {
+    q: "祭桌上放香爐、壽桃同酒，主要用途係？",
+    choices: ["擺設裝飾，冇特別意思", "祭祖祈福、表達尊敬同祈求平安", "只係畀遊客拍照用", "用來煮嘢食"],
+    answer: 1,
+    explain: "香爐、壽桃（福）同酒係常見祭祖用品，表達尊敬同祈求福氣平安。"
+  }
+];
+
+let i = 0, score = 0, locked = false;
+
+const $ = (id) => document.getElementById(id);
+const startEl = $("start"), quizEl = $("quiz"), resultEl = $("result");
+
+$("startBtn").onclick = () => {
+  startEl.classList.add("hidden");
+  quizEl.classList.remove("hidden");
+  i = 0; score = 0;
+  showQ();
+};
+
+$("retryBtn").onclick = () => {
+  resultEl.classList.add("hidden");
+  startEl.classList.remove("hidden");
+};
+
+$("nextBtn").onclick = () => {
+  i++;
+  if (i >= QUESTIONS.length) endQuiz();
+  else showQ();
+};
+
+function showQ() {
+  locked = false;
+  const item = QUESTIONS[i];
+  $("qno").textContent = `第 ${i + 1} / ${QUESTIONS.length} 題`;
+  $("qtext").textContent = item.q;
+  $("bar").style.width = ((i) / QUESTIONS.length * 100) + "%";
+  $("nextBtn").disabled = true;
+  $("nextBtn").textContent = i === QUESTIONS.length - 1 ? "睇成績" : "下一題";
+  const fb = $("feedback");
+  fb.className = "feedback";
+  fb.textContent = "";
+  const opts = $("opts");
+  opts.innerHTML = "";
+  item.choices.forEach((c, idx) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.type = "button";
+    b.textContent = ["A","B","C","D"][idx] + ". " + c;
+    b.onclick = () => pick(idx, b);
+    opts.appendChild(b);
+  });
+}
+
+function pick(idx, btn) {
+  if (locked) return;
+  locked = true;
+  const item = QUESTIONS[i];
+  const buttons = [...$("opts").children];
+  buttons.forEach((b, j) => {
+    b.disabled = true;
+    if (j === item.answer) b.classList.add("correct");
+  });
+  const fb = $("feedback");
+  if (idx === item.answer) {
+    score++;
+    btn.classList.add("correct");
+    fb.className = "feedback show ok";
+    fb.textContent = "✅ 答啱！ " + item.explain;
+  } else {
+    btn.classList.add("wrong");
+    fb.className = "feedback show bad";
+    fb.textContent = "❌ 未啱。正確係 " + ["A","B","C","D"][item.answer] + "。" + item.explain;
+  }
+  $("bar").style.width = ((i + 1) / QUESTIONS.length * 100) + "%";
+  $("nextBtn").disabled = false;
+}
+
+function endQuiz() {
+  quizEl.classList.add("hidden");
+  resultEl.classList.remove("hidden");
+  $("score").textContent = score + " / " + QUESTIONS.length;
+  const stars = score >= 5 ? "⭐⭐⭐" : score >= 3 ? "⭐⭐" : "⭐";
+  $("stars").textContent = stars;
+  $("praise").textContent =
+    score === 5 ? "好叻！你已經掌握屏山文物徑嘅基本資料。" :
+    score >= 3 ? "唔錯！再睇一次相片同解釋，可以再高分。" :
+    "再試一次啦！記住：元朗屏山、鄧族、祭祖祈福。";
+}
+</script>
+</body>
+</html>
